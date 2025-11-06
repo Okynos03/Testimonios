@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import testimonios from './data';
+import Testimonial from './Components/Testimonial';
+import Controls from './Components/Controls';
+import './styles.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [index, setIndex] = useState(0);
+  const length = testimonios.length;
+  const autoplayRef = useRef(null);
+
+  const next = () => setIndex(prev => (prev + 1) % length);
+  const prev = () => setIndex(prev => (prev - 1 + length) % length);
+  const random = () => {
+    let r = Math.floor(Math.random() * length);
+    if (r === index) r = (r + 1) % length; // evitar mismo índice
+    setIndex(r);
+  };
+
+  // ✅ todo esto va dentro de App()
+  useEffect(() => {
+    autoplayRef.current = setInterval(() => {
+      setIndex(i => (i + 1) % length);
+    }, 5000);
+    return () => clearInterval(autoplayRef.current);
+  }, [length]);
+
+  const handleUserAction = (actionFn) => {
+    clearInterval(autoplayRef.current);
+    actionFn();
+
+    autoplayRef.current = setInterval(() => {
+      setIndex(i => (i + 1) % length);
+    }, 5000);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <main className="app">
+      <h1 id='title'>Testimonios</h1>
 
-export default App
+      <div className="card-wrapper">
+        <Testimonial item={testimonios[index]} />
+      </div>
+
+      <Controls
+        onPrev={() => handleUserAction(prev)}
+        onNext={() => handleUserAction(next)}
+        onRandom={() => handleUserAction(random)}
+      />
+
+      <p className="counter">
+        {index + 1} / {length}
+      </p>
+    </main>
+  );
+}
