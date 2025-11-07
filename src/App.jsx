@@ -18,7 +18,7 @@ export default function App() {
     setIndex(r);
   };
 
-  // ✅ todo esto va dentro de App()
+  //autoplay
   useEffect(() => {
     autoplayRef.current = setInterval(() => {
       setIndex(i => (i + 1) % length);
@@ -34,6 +34,20 @@ export default function App() {
       setIndex(i => (i + 1) % length);
     }, 5000);
   };
+
+  //teclado
+  useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowRight') {
+      handleUserAction(next);
+    } else if (e.key === 'ArrowLeft') {
+      handleUserAction(prev);
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, []);
 
   return (
     <main className="app">
